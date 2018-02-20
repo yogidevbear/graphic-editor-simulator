@@ -10,6 +10,12 @@
   []
   (swap! image :assoc []))
 
+(defn I
+  "I define a function that takes a width (M) and height (N) as arguments
+  and creates a 2 dimensional vector to represent an M by N pixel image"
+  [M N]
+  (into [] (repeat N (into [] (take M (repeat "O"))))))
+
 (comment "
   Questions:
   ==========
