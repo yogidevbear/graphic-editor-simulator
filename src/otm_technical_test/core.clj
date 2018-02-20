@@ -2,18 +2,13 @@
   (:gen-class))
 
 (def image
-  "I define an atom initialised as an empty vector"
-  (atom []))
+  "I define an image atom initialised as an empty vector"
+  (atom [1 2 3]))
 
-(defn initialise-session
-  "I define a function that takes the image atom and swap!s it to the initial empty vector state"
-  [img]
-  (swap! img :assoc []))
-
-(defn create-new-image
-  "I create a new image"[])
-
-(initialise-session image)
+(defn X
+  "I define a function that swap!s image atom to the initial empty vector state"
+  []
+  (swap! image :assoc []))
 
 (comment "
   Questions:
