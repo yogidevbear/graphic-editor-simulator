@@ -3,7 +3,7 @@
 
 (def image
   "I define an image atom initialised as an empty vector"
-  (atom [1 2 3]))
+  (atom []))
 
 (defn X
   "I define a function that swap!s image atom to the initial empty vector state"
