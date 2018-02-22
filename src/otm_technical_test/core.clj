@@ -25,6 +25,17 @@
   [M N]
   (swap! image :assoc (into [] (repeat N (into [] (take M (repeat "O")))))))
 
+(defn L
+  "I define a function that updates one cell within the 2D image vector"
+  [X Y C]
+  (update-image (assoc-in @image [(dec Y) (dec X)] C)))
+
+(defn update-image
+  "I define a function that takes a function and swap!s
+  the value of @image using the passed in function"
+  [f]
+  (swap! image :assoc f))
+
 (comment "
   Questions:
   ==========
