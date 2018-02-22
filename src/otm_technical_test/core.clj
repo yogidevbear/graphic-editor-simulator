@@ -1,4 +1,5 @@
 (ns otm-technical-test.core
+  (:require [clojure.spec.alpha :as s])
   (:gen-class))
 
 (def image
@@ -10,11 +11,19 @@
   []
   (swap! image :assoc []))
 
+(defn S
+  "I define a function that prints the current image atom"
+  []
+  (print @image))
+
+(s/fdef I
+  :args (s/cat :M #(s/int-in-range? 1 251 %)
+               :N #(< 1 %)))
 (defn I
   "I define a function that takes a width (M) and height (N) as arguments
   and creates a 2 dimensional vector to represent an M by N pixel image"
   [M N]
-  (into [] (repeat N (into [] (take M (repeat "O"))))))
+  (swap! image :assoc (into [] (repeat N (into [] (take M (repeat "O")))))))
 
 (comment "
   Questions:
