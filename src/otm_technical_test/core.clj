@@ -1,5 +1,6 @@
 (ns otm-technical-test.core
-  (:require [clojure.spec.alpha :as s])
+  (:require [clojure.spec.alpha :as s]
+            [com.rpl.specter :as sp])
   (:gen-class))
 
 (def image
@@ -18,23 +19,69 @@
 
 (s/fdef I
   :args (s/cat :M #(s/int-in-range? 1 251 %)
-               :N #(< 1 %)))
+               :N #(s/int-in-range? 1 251 %)))
 (defn I
   "I define a function that takes a width (M) and height (N) as arguments
   and creates a 2 dimensional vector to represent an M by N pixel image"
   [M N]
-  (swap! image :assoc (into [] (repeat N (into [] (take M (repeat "O")))))))
+  (if (validate-dimension-input [M N])
+    (update-image (into [] (repeat N (into [] (take M (repeat "O"))))))
+    (str "In the function (I M N), both M and N need to be integer values between 1 and 250. Please try again.")))
 
 (defn L
-  "I define a function that updates one cell within the 2D image vector"
+  "I define a function that updates one cell within the 2D image vector
+  with a new colour"
   [X Y C]
-  (update-image (assoc-in @image [(dec Y) (dec X)] C)))
+  (if (and (<= 1 X (count (first @image)))
+           (<= 1 Y (count @image)))
+    (update-image (assoc-in @image [(dec Y) (dec X)] C))
+    (str "The values you supplied won't work. Please check that 1 <= X <= "
+         (count (first @image))
+         " and that 1 <= Y1 <= Y2 <= "
+         (count @image) ".")))
+
+(defn V
+  "I define a function that updates a vertical segment within the 2D
+  image vector with a new colour"
+  [X Y1 Y2 C]
+  (if (and
+        (<= 1 X (count (first @image)))
+        (<= 1 Y1 Y2 (count @image)))
+    (update-image (into [] (concat (subvec @image 0 (dec Y1))
+                                   (map #(assoc % (dec X) C) (subvec @image (dec Y1) Y2))
+                                   (subvec @image Y2))))
+    (str "The values you supplied won't work. Please check that 1 <= X <= "
+         (count (first @image))
+         " and that 1 <= Y1 <= Y2 <= "
+         (count @image) ".")))
+
+(defn H
+  "I define a function that updates a horizontal segment within the 2D
+  image horizontal with a new colour"
+  [X1 X2 Y C]
+  (if (and
+        (<= 1 X1 X2 (count (first @image)))
+        (<= 1 Y (count @image)))
+    (update-image (into [] (concat (subvec @image 0 (dec Y))
+                                   [(sp/setval [(sp/srange (dec X1) X2) sp/ALL] C (first (subvec @image (dec Y) Y)))]
+                                   (subvec @image Y))))
+    (str "The values you supplied won't work. Please check that 1 <= X1 <= X2 <= "
+         (count (first @image))
+         " and that 1 <= Y <= "
+         (count @image) ".")))
 
 (defn update-image
   "I define a function that takes a function and swap!s
   the value of @image using the passed in function"
   [f]
   (swap! image :assoc f))
+
+(defn validate-dimension-input
+  "I define a function that takes a collection of values and
+  check that each value conforms to the defined business rules
+  for data type and min/max values"
+  [coll]
+  (not (some false? (map #(and (integer? %) (<= 1 % 250)) coll))))
 
 (comment "
   Questions:
