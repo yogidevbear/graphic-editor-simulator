@@ -47,9 +47,7 @@
   (if (and
         (<= 1 X (count (first @image)))
         (<= 1 Y1 Y2 (count @image)))
-    (update-image (into [] (concat (subvec @image 0 (dec Y1))
-                                   (map #(assoc % (dec X) C) (subvec @image (dec Y1) Y2))
-                                   (subvec @image Y2))))
+    (update-image (sp/setval (mat-elems Y1 X Y2 X) C @image))
     (str "The values you supplied won't work. Please check that 1 <= X <= "
          (count (first @image))
          " and that 1 <= Y1 <= Y2 <= "
@@ -62,13 +60,15 @@
   (if (and
         (<= 1 X1 X2 (count (first @image)))
         (<= 1 Y (count @image)))
-    (update-image (into [] (concat (subvec @image 0 (dec Y))
-                                   [(sp/setval [(sp/srange (dec X1) X2) sp/ALL] C (first (subvec @image (dec Y) Y)))]
-                                   (subvec @image Y))))
+    (update-image (sp/setval (mat-elems Y X1 Y X2) C @image))
     (str "The values you supplied won't work. Please check that 1 <= X1 <= X2 <= "
          (count (first @image))
          " and that 1 <= Y <= "
          (count @image) ".")))
+
+(defn mat-elems [row col end-row end-col]
+  (let [row (dec row) col (dec col)]
+    (sp/path (sp/srange row end-row) sp/ALL (sp/srange col end-col) sp/ALL)))
 
 (defn update-image
   "I define a function that takes a function and swap!s
