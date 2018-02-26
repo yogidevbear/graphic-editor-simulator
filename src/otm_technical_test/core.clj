@@ -17,6 +17,23 @@
   []
   (print @image))
 
+(defn validate-dimension-input
+  "I define a function that takes a collection of values and
+  check that each value conforms to the defined business rules
+  for data type and min/max values"
+  [coll]
+  (not (some false? (map #(and (integer? %) (<= 1 % 250)) coll))))
+
+(defn update-image
+  "I define a function that takes a function and swap!s
+  the value of @image using the passed in function"
+  [f]
+  (swap! image :assoc f))
+
+(defn mat-elems [row col end-row end-col]
+  (let [row (dec row) col (dec col)]
+    (sp/path (sp/srange row end-row) sp/ALL (sp/srange col end-col) sp/ALL)))
+
 (s/fdef I
   :args (s/cat :M #(s/int-in-range? 1 251 %)
                :N #(s/int-in-range? 1 251 %)))
@@ -37,7 +54,7 @@
     (update-image (assoc-in @image [(dec Y) (dec X)] C))
     (str "The values you supplied won't work. Please check that 1 <= X <= "
          (count (first @image))
-         " and that 1 <= Y1 <= Y2 <= "
+         " and that 1 <= Y <= "
          (count @image) ".")))
 
 (defn V
@@ -66,22 +83,90 @@
          " and that 1 <= Y <= "
          (count @image) ".")))
 
-(defn mat-elems [row col end-row end-col]
-  (let [row (dec row) col (dec col)]
-    (sp/path (sp/srange row end-row) sp/ALL (sp/srange col end-col) sp/ALL)))
+(defn get-point-value
+  "I define a function that gets the currently set value for a particular point
+  within the 2D image."
+  [X Y]
+  (nth (nth @image (dec Y)) (dec X)))
 
-(defn update-image
-  "I define a function that takes a function and swap!s
-  the value of @image using the passed in function"
-  [f]
-  (swap! image :assoc f))
+(defn get-adjacent-points
+  "I define a function that works out the value vertical and horizontal adjacent points."
+  [X Y]
+  (let [up [(- X 1) (- Y 2)]
+        right [X (- Y 1)]
+        down [(- X 1) Y]
+        left [(- X 2) (- Y 1)]]
+    (into #{} (filter some?
+                (map #(if (and (<= 0 (first %) (dec (count (first @image)))) ;Check that the x coordinate is within the bounds of @image
+                               (<= 0 (first (rest %)) (dec (count @image)))) ;Check that the y coordinate is within the bounds of @image
+                        %) [up right down left])))))
 
-(defn validate-dimension-input
-  "I define a function that takes a collection of values and
-  check that each value conforms to the defined business rules
-  for data type and min/max values"
-  [coll]
-  (not (some false? (map #(and (integer? %) (<= 1 % 250)) coll))))
+(S)
+(build-matrix 1 1 "O" "_" #{} #{})
+(defn build-matrix
+  [X Y C1 C2 tested-matrix final-matrix]
+  (if (= (get-point-value (dec X) (dec Y)) C1)
+    (
+     ;(L X Y C2)
+     (map #(build-matrix (first %) (last %) C1 C2 tested-matrix final-matrix) (get-adjacent-points X Y)))
+    final-matrix))
+  (loop []
+    (when (> (count adj-points) 1)
+      matrix
+      (if (not (contains? matrix (first adj-points)))
+        (clojure.set/union matrix (first adj-points))
+        ))))
+  (let [adj-points (get-adjacent-points X Y)]
+    (clojure.set/union matrix adj-points)
+    ()))
+(let [ap (get-adjacent-points 1 1)]
+  (loop ap))
+(defn wtf
+  [X Y C1 C2 matrix]
+  (let [up [(- X 1) (- Y 2)]
+        right [X (- Y 1)]
+        down [(- X 1) Y]
+        left [(- X 2) (- Y 1)]]
+    (clojure.set/union
+      matrix
+      (into #{}
+        (filter some? (map #(if (and
+                    (<= 0 (first %) (count (first @image))) ;Check that the x coordinate is within the bounds of @image
+                    (<= 0 (first (rest %)) (count @image)) ;Check that the y coordinate is within the bounds of @image
+                    (= (get-point-value (inc (first %)) (inc (first (rest %)))) C1) ;Check that colour at coordinate matches the originating point colour in F function call
+                    )
+                %) [up right down left]))))))
+;    (if (and (<= 1 (first up) (count (first @image))) (<= (first (rest up)) (count @image)))
+;      (conj matrix up))))
+    ;(conj matrix up right down left)))
+(wtf 1 1 "O" "X" #{})
+(defn F
+  "I define a function that fills the region R with the colour C.
+  R is defined as: Pixel (X,Y) belongs to R. Any other pixel which
+  is the same colour as (X,Y) and shares a common side with any
+  pixel in R also belongs to this region."
+  [X Y C]
+  (if (and (<= 1 X (count (first @image)))
+           (<= 1 Y (count @image)))
+    (let [C1 (get-point-value X Y)
+          C2 C
+          xmax (count (first @image))
+          ymax (count @image)]
+      (fn [X Y C1 C2 matrix]
+        ;([X Y C1 C2 matrix]))
+        ())
+      [X Y C1 C2 #{}])
+    (str "The values you supplied won't work. Please check that 1 <= X <= "
+         (count (first @image))
+         " and that 1 <= Y <= "
+         (count @image) ".")))
+
+(I 10 10)
+(L 3 3 "W")
+(H 2 6 5 "X")
+(V 5 3 8 "I")
+(S)
+(F 4 6 "@")
 
 (comment "
   Questions:
