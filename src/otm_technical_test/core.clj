@@ -123,19 +123,21 @@
                       ((L x y C)
                        (into #{} (apply concat (map #(get-adjacent-points %) #{[x y]}))))))))
       #{[X Y]}))
+(I 5 5)
+(L 3 3 "W")
+(H 2 4 2 "X")
 (S)
 (F 1 1 "P")
 (defn F
   [X Y C]
-  (let [_C (get-point-value X Y)
-        R [[X Y]]
-        Q [[X Y]]]
-    ))
-
-(defn turtles-all-the-way-down [func elements value]
-  (if (empty? elements)
-    value
-    (recur func () ())))
+  (let [_C (get-point-value X Y)]
+    (L X Y C)
+    (map
+      #(if (= _C (get-point-value (first %) (last %)))
+        (recur [(inc (first %)) (inc (last %)) C]))
+      (get-adjacent-points [X Y]))))
+(get-point-value (first [1 1]) (last [1 1]))
+(get-adjacent-points [1 1])
 
 (build-matrix 1 1 "O" "_" #{} #{})
 (defn build-matrix
@@ -156,25 +158,6 @@
     ()))
 (let [ap (get-adjacent-points 1 1)]
   (loop ap))
-(defn wtf
-  [X Y C1 C2 matrix]
-  (let [up [(- X 1) (- Y 2)]
-        right [X (- Y 1)]
-        down [(- X 1) Y]
-        left [(- X 2) (- Y 1)]]
-    (clojure.set/union
-      matrix
-      (into #{}
-        (filter some? (map #(if (and
-                    (<= 0 (first %) (count (first @image))) ;Check that the x coordinate is within the bounds of @image
-                    (<= 0 (first (rest %)) (count @image)) ;Check that the y coordinate is within the bounds of @image
-                    (= (get-point-value (inc (first %)) (inc (first (rest %)))) C1) ;Check that colour at coordinate matches the originating point colour in F function call
-                    )
-                %) [up right down left]))))))
-;    (if (and (<= 1 (first up) (count (first @image))) (<= (first (rest up)) (count @image)))
-;      (conj matrix up))))
-    ;(conj matrix up right down left)))
-(wtf 1 1 "O" "X" #{})
 (defn F
   "I define a function that fills the region R with the colour C.
   R is defined as: Pixel (X,Y) belongs to R. Any other pixel which
