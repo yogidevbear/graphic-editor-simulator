@@ -104,60 +104,6 @@
                          (<= 0 (last %) (dec (count @image))))
                   %) [up right down left]))))
 
-(I 5 5)
-(L 3 3 "W")
-(H 2 4 2 "X")
-(S)
-(into #{} (apply concat (map #(get-adjacent-points %) #{[1 1]})))
-
-(defn F
-  "I define a function that fills the region R with the colour C.
-  R is defined as: Pixel (X,Y) belongs to R. Any other pixel which
-  is the same colour as (X,Y) and shares a common side with any
-  pixel in R also belongs to this region."
-  [X Y C]
-  (let [C1 (get-point-value X Y)]
-    (map (fn [xy] (let [x (first xy)
-                        y (last xy)]
-                    (if (= C1 (get-point-value x y))
-                      ((L x y C)
-                       (into #{} (apply concat (map #(get-adjacent-points %) #{[x y]}))))))))
-      #{[X Y]}))
-(I 5 5)
-(L 3 3 "W")
-(H 2 4 2 "X")
-(S)
-(F 1 1 "P")
-(defn F
-  [X Y C]
-  (let [_C (get-point-value X Y)]
-    (L X Y C)
-    (map
-      #(if (= _C (get-point-value (first %) (last %)))
-        (recur [(inc (first %)) (inc (last %)) C]))
-      (get-adjacent-points [X Y]))))
-(get-point-value (first [1 1]) (last [1 1]))
-(get-adjacent-points [1 1])
-
-(build-matrix 1 1 "O" "_" #{} #{})
-(defn build-matrix
-  [X Y C1 C2 tested-matrix final-matrix]
-  (if (= (get-point-value X Y) C1)
-    ;(
-     ;(L X Y C2)
-     (map (recur (inc (first %)) (inc (last %)) C1 C2 (clojure.set/union tested-matrix %) (clojure.set/union final-matrix %)) (get-adjacent-points X Y)) ;)
-    final-matrix))
-  (loop []
-    (when (> (count adj-points) 1)
-      matrix
-      (if (not (contains? matrix (first adj-points)))
-        (clojure.set/union matrix (first adj-points))
-        ))))
-  (let [adj-points (get-adjacent-points X Y)]
-    (clojure.set/union matrix adj-points)
-    ()))
-(let [ap (get-adjacent-points 1 1)]
-  (loop ap))
 (defn F
   "I define a function that fills the region R with the colour C.
   R is defined as: Pixel (X,Y) belongs to R. Any other pixel which
@@ -166,25 +112,16 @@
   [X Y C]
   (if (and (<= 1 X (count (first @image)))
            (<= 1 Y (count @image)))
-    (let [C1 (get-point-value X Y)
-          C2 C
-          xmax (count (first @image))
-          ymax (count @image)]
-      (fn [X Y C1 C2 matrix]
-        ;([X Y C1 C2 matrix]))
-        ())
-      [X Y C1 C2 #{}])
+    (let [_C (get-point-value X Y)]
+      (L X Y C)
+      (map
+        #(if (= _C (get-point-value (inc (first %)) (inc (last %))))
+          (F (inc (first %)) (inc (last %)) C))
+        (get-adjacent-points [X Y])))
     (str "The values you supplied won't work. Please check that 1 <= X <= "
          (count (first @image))
          " and that 1 <= Y <= "
          (count @image) ".")))
-
-(I 5 5)
-(L 3 3 "W")
-(H 2 4 2 "X")
-(V 5 3 8 "I")
-(S)
-(F 4 6 "@")
 
 (comment "
   Questions:
