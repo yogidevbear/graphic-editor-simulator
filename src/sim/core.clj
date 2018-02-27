@@ -45,6 +45,11 @@
     (update-image (into [] (repeat N (into [] (take M (repeat "O"))))))
     (str "In the function (I M N), both M and N need to be integer values between 1 and 250. Please try again.")))
 
+(defn C
+  "I define a function that swap!s all values in current image atom with \"0\""
+  []
+  (I (count (first @image)) (count @image)))
+
 (defn L
   "I define a function that updates one cell within the 2D image vector
   with a new colour"
