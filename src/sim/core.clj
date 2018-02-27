@@ -1,4 +1,4 @@
-(ns otm-technical-test.core
+(ns sim.core
   (:require [clojure.spec.alpha :as s]
             [com.rpl.specter :as sp])
   (:gen-class))

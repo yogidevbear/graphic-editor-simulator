@@ -1,6 +1,6 @@
-(ns otm-technical-test.core-test
+(ns sim.core-test
   (:require [clojure.test :refer :all]
-            [otm-technical-test.core :refer :all]))
+            [sim.core :refer :all]))
 
 (deftest a-test
   (testing "FIXME, I fail."
