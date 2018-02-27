@@ -90,25 +90,60 @@
   (nth (nth @image (dec Y)) (dec X)))
 
 (defn get-adjacent-points
-  "I define a function that works out the value vertical and horizontal adjacent points."
-  [X Y]
-  (let [up [(- X 1) (- Y 2)]
-        right [X (- Y 1)]
-        down [(- X 1) Y]
-        left [(- X 2) (- Y 1)]]
-    (into #{} (filter some?
-                (map #(if (and (<= 0 (first %) (dec (count (first @image)))) ;Check that the x coordinate is within the bounds of @image
-                               (<= 0 (first (rest %)) (dec (count @image)))) ;Check that the y coordinate is within the bounds of @image
-                        %) [up right down left])))))
+  "I define a function that works out the value vertical and
+  horizontal adjacent points for a given set of coordinates."
+  [coll]
+  (let [x (first coll)
+        y (last coll)
+        up [(- x 1) (- y 2)]
+        right [x (- y 1)]
+        down [(- x 1) y]
+        left [(- x 2) (- y 1)]]
+        (filter some?
+          (map #(if (and (<= 0 (first %) (dec (count (first @image))))
+                         (<= 0 (last %) (dec (count @image))))
+                  %) [up right down left]))))
 
+(I 5 5)
+(L 3 3 "W")
+(H 2 4 2 "X")
 (S)
+(into #{} (apply concat (map #(get-adjacent-points %) #{[1 1]})))
+
+(defn F
+  "I define a function that fills the region R with the colour C.
+  R is defined as: Pixel (X,Y) belongs to R. Any other pixel which
+  is the same colour as (X,Y) and shares a common side with any
+  pixel in R also belongs to this region."
+  [X Y C]
+  (let [C1 (get-point-value X Y)]
+    (map (fn [xy] (let [x (first xy)
+                        y (last xy)]
+                    (if (= C1 (get-point-value x y))
+                      ((L x y C)
+                       (into #{} (apply concat (map #(get-adjacent-points %) #{[x y]}))))))))
+      #{[X Y]}))
+(S)
+(F 1 1 "P")
+(defn F
+  [X Y C]
+  (let [_C (get-point-value X Y)
+        R [[X Y]]
+        Q [[X Y]]]
+    ))
+
+(defn turtles-all-the-way-down [func elements value]
+  (if (empty? elements)
+    value
+    (recur func () ())))
+
 (build-matrix 1 1 "O" "_" #{} #{})
 (defn build-matrix
   [X Y C1 C2 tested-matrix final-matrix]
-  (if (= (get-point-value (dec X) (dec Y)) C1)
-    (
+  (if (= (get-point-value X Y) C1)
+    ;(
      ;(L X Y C2)
-     (map #(build-matrix (first %) (last %) C1 C2 tested-matrix final-matrix) (get-adjacent-points X Y)))
+     (map (recur (inc (first %)) (inc (last %)) C1 C2 (clojure.set/union tested-matrix %) (clojure.set/union final-matrix %)) (get-adjacent-points X Y)) ;)
     final-matrix))
   (loop []
     (when (> (count adj-points) 1)
@@ -161,9 +196,9 @@
          " and that 1 <= Y <= "
          (count @image) ".")))
 
-(I 10 10)
+(I 5 5)
 (L 3 3 "W")
-(H 2 6 5 "X")
+(H 2 4 2 "X")
 (V 5 3 8 "I")
 (S)
 (F 4 6 "@")
