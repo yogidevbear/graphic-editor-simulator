@@ -27,8 +27,6 @@ belongs to this region.
 7. **(S)** . Show the contents of the current image
 8. **(X)** . Terminate the session
 
-/*## Installation*/
-
 ## Usage
 
 ### Standalone
