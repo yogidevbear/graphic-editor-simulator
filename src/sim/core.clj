@@ -1,21 +1,17 @@
 (ns sim.core
   (:require [clojure.spec.alpha :as s]
-            [com.rpl.specter :as sp])
+            [com.rpl.specter :as sp]
+            [clojure.pprint :as pp])
   (:gen-class))
 
 (def image
   "I define an image atom initialised as an empty vector"
   (atom []))
 
-(defn X
-  "I define a function that swap!s image atom to the initial empty vector state"
-  []
-  (swap! image :assoc []))
-
 (defn S
   "I define a function that prints the current image atom"
   []
-  (print @image))
+  @image)
 
 (defn validate-dimension-input
   "I define a function that takes a collection of values and
@@ -43,7 +39,8 @@
   [M N]
   (if (validate-dimension-input [M N])
     (update-image (into [] (repeat N (into [] (take M (repeat "O"))))))
-    (str "In the function (I M N), both M and N need to be integer values between 1 and 250. Please try again.")))
+    (str "In the function (I M N), both M and N need to be integer values between 1 and 250. You supplied "
+         M " and " N ". Please try again.")))
 
 (defn C
   "I define a function that swap!s all values in current image atom with \"0\""
@@ -128,16 +125,14 @@
          " and that 1 <= Y <= "
          (count @image) ".")))
 
-(comment "
-  Questions:
-  ==========
-  - How is the system going to be run/accessed?
-    (e.g. make use of -main function or not, will commands come from REPL, etc.)
-  - How are commands being read in by the system?
-    (e.g. will commands be input as \"I 5 6\" or as \"(run I 5 6)\" or ???)
-  - What happens when an invalid function letter is supplied?
-    (i.e. anything other than I C L V H F S X)
-  - What happens when anything other than a positive integer is supplied?
-    (include logical types like negative integers, zero, nil, etc)
-  - Other considerations...?
-  ")
+(defn -main [& _]
+  (loop []
+    (let [_ (do (print "=> ") (flush))
+          args (clojure.string/split (read-line) #" ")]
+      (when-not (= "X" (first args))
+        (if-let [f (resolve (symbol "sim.core" (first args)))]
+          (let [result (apply f (map #(try (Long/parseLong %) (catch Exception _ %)) (rest args)))]
+            (when (= "S" (first args))
+              (pp/pprint result)))
+          (println "Sorry, I don't understand the" (first args) "command!"))
+        (recur)))))
