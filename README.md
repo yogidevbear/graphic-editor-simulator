@@ -45,18 +45,38 @@ Once the REPL is running, execute the various commands. E.g.:
 => (F 3 3 "J") ;; Updates the value of all vertical/horizontal neighbouring points that recursively join the initial column 3 in row 3 and have the same initial value
 => (V 2 3 4 "W") ;; Updates the values in the second column on rows 3 and 4 to "W"
 => (H 3 4 2 "Z") ;; Updates the values in columns 3 and 4 on row 2 to "Z"
-=> (X) ;; Terminates the session returning an empty image vector
 ```
 
 ### Standalone
 
 ```
-$ java -jar graphic-editor-simulator-0.1.0-standalone.jar [args]
+$ lein uberjar
+$ java -jar target\uberjar\graphic-editor-simulator-0.1.0-SNAPSHOT-standalone.jar
+```
+Then simply enter the commands. E.g.:
+
+```
+=> (I 5 6) ;; Creates a 5 x 6 image
+=> (S) ;; Shows the contents in the current image
+=> (C) ;; Sets all the point values in the current image to "O"
+=> (L 2 3 A) ;; Updates the value in the second column on the third row to "A"
+=> (F 3 3 J) ;; Updates the value of all vertical/horizontal neighbouring points that recursively join the initial column 3 in row 3 and have the same initial value
+=> (V 2 3 4 W) ;; Updates the values in the second column on rows 3 and 4 to "W"
+=> (H 3 4 2 Z) ;; Updates the values in columns 3 and 4 on row 2 to "Z"
+=> (X) ;; Terminates the session, exiting the REPL
 ```
 
 ### Tests
 
 Using the terminal, change into the project root directory and run `lein test`.
+
+Note: Tests are not complete.
+
+## Bugs
+
+The `F` function needs some refactoring to improve it's efficiency (maybe a recursive helper function with an argument that is the set of processed pixels which returns an updated set). It fails within the `lein repl` execution at about `I 69 69` boundary.
+
+There is also a bug within the save function when being called from the `-main` function in the standalone execution. Only seems to be updating the initial pixel point and not any subsequent points that appear to work correctly in the `lein repl` execution.
 
 ## License
 
