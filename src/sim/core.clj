@@ -7,7 +7,7 @@
 (def image
   "I define an image atom initialised as an empty vector"
   (atom []))
-
+(S)
 (defn S
   "I define a function that prints the current image atom"
   []
@@ -24,7 +24,7 @@
   "I define a function that takes a function and swap!s
   the value of @image using the passed in function"
   [f]
-  (swap! image :assoc f))
+  (swap! image :assoc f));use of reset!
 
 (defn mat-elems [row col end-row end-col]
   (let [row (dec row) col (dec col)]
@@ -125,6 +125,37 @@
          " and that 1 <= Y <= "
          (count @image) ".")))
 
+(defn get-n-length-boundary-points
+ "I define a function that works out the value surrounding points that form
+ a square n pixels away from a given point."
+ [coll i]
+ (let [x (first coll)
+       y (last coll)
+       bpoints {:nw [(- x i) (- y i)]
+        :ne [(+ x i) (- y i)]
+        :se [(+ x i) (+ y i)]
+       :sw [(- x i) (+ y i)]}]
+    bpoints))
+
+(defn R
+  "I define a function that fills in incremental sqares around a single point"
+  [X Y coll]
+  (map-indexed
+    (fn [idx itm]
+      (let [bpoints (get-n-length-boundary-points [X Y] (inc idx))]
+        (H (first (:nw bpoints))
+           (first (:ne bpoints))
+           (last (:nw bpoints))
+           itm)
+        (H (first (:sw bpoints))
+           (first (:se bpoints))
+           (last (:sw bpoints))
+           itm)
+        ))
+        ;[X1 X2 Y C]
+        ;(V [(get bpoints : Y1 Y2 C])))
+    coll))
+(S)
 (defn -main [& _]
   (loop []
     (let [_ (do (print "=> ") (flush))
